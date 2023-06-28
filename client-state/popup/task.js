@@ -1,17 +1,13 @@
 const modal = document.getElementById('subscribe-modal');
 const closeButton = modal.querySelector('.modal__close');
 
-// Проверяем, есть ли информация о закрытии окна в cookie
 const isModalClosed = getCookie('modal_closed');
 if (!isModalClosed) {
-  // Если окно не было закрыто, показываем его
   modal.classList.add('modal_active');
 }
 
 closeButton.addEventListener('click', () => {
-  // Закрываем окно
   modal.classList.remove('modal_active');
-  // Устанавливаем информацию о закрытии окна в cookie на 7 дней
   setCookie('modal_closed', true, 7);
 });
 
