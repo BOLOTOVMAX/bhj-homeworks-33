@@ -1,34 +1,37 @@
-const modal = document.getElementById('subscribe-modal');
-const closeButton = modal.querySelector('.modal__close');
+const signinForm = document.getElementById('signin__form');
+const welcomeBlock = document.getElementById('welcome');
+const userIdSpan = document.getElementById('user_id');
 
-// Проверяем, есть ли информация о закрытии окна в cookie
-const isModalClosed = getCookie('modal_closed');
-if (!isModalClosed) {
-  // Если окно не было закрыто, показываем его
-  modal.classList.add('modal_active');
+const userId = localStorage.getItem('user_id');
+if (userId) {
+  userIdSpan.textContent = userId;
+  welcomeBlock.classList.add('welcome_active');
 }
 
-closeButton.addEventListener('click', () => {
-  // Закрываем окно
-  modal.classList.remove('modal_active');
-  // Устанавливаем информацию о закрытии окна в cookie на 7 дней
-  setCookie('modal_closed', true, 7);
-});
+signinForm.addEventListener('submit', (event) => {
+  event.preventDefault();
 
-function setCookie(name, value, days) {
-  const date = new Date();
-  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-  const expires = "expires=" + date.toUTCString();
-  document.cookie = name + "=" + value + ";" + expires + ";path=/";
-}
+  const login = signinForm.elements.login.value;
+  const password = signinForm.elements.password.value;
 
-function getCookie(name) {
-  const cookies = document.cookie.split(';');
-  for (let i = 0; i < cookies.length; i++) {
-    const cookie = cookies[i].trim();
-    if (cookie.startsWith(name + "=")) {
-      return cookie.substring(name.length + 1);
+  fetch('https://students.netoservices.ru/nestjs-backend/auth', {
+    method: 'POST',
+    body: JSON.stringify({ login, password }),
+    headers: {
+      'Content-Type': 'application/json'
     }
-  }
-  return null;
-}
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        localStorage.setItem('user_id', data.user_id);
+        userIdSpan.textContent = data.user_id;
+        welcomeBlock.classList.add('welcome_active');
+      } else {
+        alert('Неверный логин/пароль');
+      }
+    })
+    .catch(error => {
+      console.error('Ошибка:', error);
+    });
+});
